@@ -1,0 +1,7 @@
+ALTER TABLE "Rating"
+ADD COLUMN "tempo" INTEGER,
+ADD COLUMN "shooting" INTEGER,
+ADD COLUMN "passing" INTEGER,
+ADD COLUMN "dribbling" INTEGER,
+ADD COLUMN "defending" INTEGER,
+ADD COLUMN "physical" INTEGER;

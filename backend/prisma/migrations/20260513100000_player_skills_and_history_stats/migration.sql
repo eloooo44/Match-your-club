@@ -1,0 +1,10 @@
+ALTER TABLE "PlayerProfile"
+ADD COLUMN "skills" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN "preferredFoot" TEXT,
+ADD COLUMN "weakFootRating" INTEGER;
+
+ALTER TABLE "PlayerClubHistory"
+ADD COLUMN "games" INTEGER,
+ADD COLUMN "goals" INTEGER,
+ADD COLUMN "yellowCards" INTEGER,
+ADD COLUMN "redCards" INTEGER;

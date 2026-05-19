@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "TrialTraining" ADD COLUMN     "initiatedBy" TEXT NOT NULL DEFAULT 'CLUB',
+ALTER COLUMN "status" SET DEFAULT 'PENDING';

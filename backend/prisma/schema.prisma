@@ -1,0 +1,356 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlayerPosition {
+  GK
+  IV
+  LV
+  RV
+  ZDM
+  ZM
+  ZOM
+  ST
+  LF
+  RF
+}
+
+enum FootballSkill {
+  REFLEXE
+  STRAFRAUMBEHERRSCHUNG
+  ZWEIKAMPFSTAERKE
+  KOPFBALLSPIEL
+  SPIELAUFBAU
+  PASSGENAUIGKEIT
+  SPIELUEBERSICHT
+  TEMPO
+  TORABSCHLUSS
+  DRIBBLING
+  AUSDAUER
+  PHYSIS
+  DEFENSIVARBEIT
+  PRESSING
+  FLANKENSPIEL
+  BALLKONTROLLE
+  ABSCHLUSS
+  EINS_GEGEN_EINS
+  HOHE_BAELLE
+  FUSSSPIEL
+  ABSTOESSE
+  ABSCHLAEGE
+  SPIELEROEFFNUNG
+  KOMMUNIKATION
+  STELLUNGSSPIEL
+  FANGSICHERHEIT
+  REAKTIONSSCHNELLIGKEIT
+  ELFMETER
+  MITSPIELENDER_TORMANN
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+
+  playerProfile               PlayerProfile?
+  clubProfile                 ClubProfile?
+  ratingsGiven                Rating[]
+  recommendationsGiven        Recommendation[]
+  connections                 Connection[]            @relation("UserConnections")
+  connectedTo                 Connection[]            @relation("ConnectedUsers")
+  attributeVerificationsGiven AttributeVerification[]
+}
+
+model ClubRequirement {
+  id Int @id @default(autoincrement())
+
+  clubId Int
+
+  position String
+
+  minTempo     Int
+  minShooting  Int
+  minPassing   Int
+  minDribbling Int
+  minDefending Int
+  minPhysical  Int
+
+  tempoWeight     Float @default(1)
+  shootingWeight  Float @default(1)
+  passingWeight   Float @default(1)
+  dribblingWeight Float @default(1)
+  defendingWeight Float @default(1)
+  physicalWeight  Float @default(1)
+
+  requiredSkills FootballSkill[] @default([])
+  highlightedSkills FootballSkill[] @default([])
+
+  description String?
+
+  club ClubProfile @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model AttributeVerification {
+  id         Int    @id @default(autoincrement())
+  playerId   Int
+  fromUserId Int
+  attribute  String
+
+  createdAt DateTime @default(now())
+
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  fromUser User @relation(fields: [fromUserId], references: [id])
+}
+
+model PlayerClubHistory {
+  id Int @id @default(autoincrement())
+
+  playerId Int
+  clubId   Int?
+  clubName String
+
+  relationType String
+  teamCategory String?
+
+  startDate DateTime?
+  endDate   DateTime?
+  games     Int?
+  goals     Int?
+  yellowCards Int?
+  redCards  Int?
+
+  verified Boolean @default(false)
+
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  club ClubProfile? @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model Application {
+  id Int @id @default(autoincrement())
+
+  playerId Int
+  clubId   Int
+
+  message String?
+  status  String  @default("PENDING")
+
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  club ClubProfile @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model TrialTraining {
+  id Int @id @default(autoincrement())
+
+  playerId Int
+  clubId   Int
+  alternativeDate1 DateTime?
+  alternativeDate2 DateTime?
+  alternativeDate3 DateTime?
+
+  selectedDate DateTime?
+
+  scheduledAt DateTime
+
+  status String @default("PENDING")
+
+  initiatedBy String @default("CLUB")
+
+  notes    String?
+  feedback String?
+
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  club ClubProfile @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  rating Rating?
+}
+
+model ContactRequest {
+  id Int @id @default(autoincrement())
+
+  playerId Int
+  clubId   Int
+
+  message String
+  status  String @default("PENDING")
+
+  createdAt DateTime @default(now())
+
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  club ClubProfile @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model PlayerVideo {
+  id Int @id @default(autoincrement())
+
+  playerId Int
+
+  title String
+
+  videoUrl  String?
+  videoPath String?
+
+  createdAt DateTime @default(now())
+
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model PlayerProfile {
+  id          Int               @id @default(autoincrement())
+  userId      Int               @unique
+  name        String
+  position    PlayerPosition[]
+  attributes  PlayerAttributes?
+  birthdate   String
+  location    String
+  description String?
+  openToPlay  Boolean           @default(true)
+  verified    Boolean           @default(false)
+  profileImageUrl  String?
+  profileImagePath String?
+  oefbProfileUrl String?
+  skills      FootballSkill[]    @default([])
+  highlightedSkills FootballSkill[] @default([])
+  preferredFoot String?
+  weakFootRating Int?
+  heightCm    Int?
+
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attributeVerifications AttributeVerification[]
+  ratings                Rating[]
+  recommendations        Recommendation[]
+  clubHistory            PlayerClubHistory[]
+  applications           Application[]
+  trialTrainings         TrialTraining[]
+  contactRequests        ContactRequest[]
+  videos                 PlayerVideo[]
+}
+
+model Connection {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  connectedUserId Int
+
+  status String
+
+  createdAt DateTime @default(now())
+
+  user User @relation("UserConnections", fields: [userId], references: [id], onDelete: Cascade)
+
+  connectedUser User @relation("ConnectedUsers", fields: [connectedUserId], references: [id], onDelete: Cascade)
+}
+
+model Recommendation {
+  id Int @id @default(autoincrement())
+
+  fromUserId Int
+  toPlayerId Int
+
+  text String
+
+  createdAt DateTime @default(now())
+
+  fromUser User @relation(fields: [fromUserId], references: [id])
+
+  toPlayer PlayerProfile @relation(fields: [toPlayerId], references: [id], onDelete: Cascade)
+}
+
+model ClubProfile {
+  id           Int               @id @default(autoincrement())
+  userId       Int               @unique
+  clubName     String
+  verband      String            @default("")
+  wettbewerb   String            @default("")
+  league       String
+  location     String
+  phone        String?           @db.VarChar(32)
+  obmannEmail  String?           @db.VarChar(255)
+  oefbClubProfileUrl String?     @db.VarChar(512)
+  leagueTableData Json?
+  sportsGroundName String?       @db.VarChar(255)
+  sportsGroundAddress String?    @db.VarChar(255)
+  sportsGroundZipCode String?    @db.VarChar(16)
+  sportsGroundCity String?       @db.VarChar(128)
+  description  String?
+  logoPath     String?
+
+  requirements ClubRequirement[]
+
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playerHistory   PlayerClubHistory[]
+  applications    Application[]
+  contactRequests ContactRequest[]
+  trialTrainings  TrialTraining[]
+}
+
+model PlayerAttributes {
+  id Int @id @default(autoincrement())
+
+  playerId Int @unique
+
+  tempo     Int
+  shooting  Int
+  passing   Int
+  dribbling Int
+  defending Int
+  physical  Int
+  reviewCount Int @default(0)
+
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model Rating {
+  id Int @id @default(autoincrement())
+
+  playerId   Int
+  fromUserId Int
+  trialTrainingId Int? @unique
+
+  ratingType String
+  score      Int
+  comment    String?
+  tempo      Int?
+  shooting   Int?
+  passing    Int?
+  dribbling  Int?
+  defending  Int?
+  physical   Int?
+
+  createdAt DateTime @default(now())
+
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  fromUser User @relation(fields: [fromUserId], references: [id])
+
+  trialTraining TrialTraining? @relation(fields: [trialTrainingId], references: [id], onDelete: SetNull)
+  skillRatings RatingSkill[]
+}
+
+model RatingSkill {
+  id Int @id @default(autoincrement())
+
+  ratingId Int
+  skill    FootballSkill
+  stars    Float
+
+  createdAt DateTime @default(now())
+
+  rating Rating @relation(fields: [ratingId], references: [id], onDelete: Cascade)
+
+  @@unique([ratingId, skill])
+}

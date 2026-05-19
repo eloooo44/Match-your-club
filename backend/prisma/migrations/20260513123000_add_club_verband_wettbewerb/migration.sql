@@ -1,0 +1,3 @@
+ALTER TABLE "ClubProfile"
+ADD COLUMN "verband" TEXT NOT NULL DEFAULT '',
+ADD COLUMN "wettbewerb" TEXT NOT NULL DEFAULT '';

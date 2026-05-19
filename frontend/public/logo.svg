@@ -1,0 +1,39 @@
+<svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define gradients -->
+  <defs>
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#84cc16;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22c55e;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- MYC Text -->
+  <text x="20" y="75" font-size="72" font-weight="900" font-family="Arial, sans-serif" fill="#1f2937" letter-spacing="-2">MYC</text>
+  
+  <!-- Soccer ball icon -->
+  <g transform="translate(220, 40)">
+    <!-- Ball outer circle -->
+    <circle cx="0" cy="0" r="28" fill="url(#greenGradient)" filter="url(#shadow)"/>
+    
+    <!-- Soccer ball pattern (simplified) -->
+    <circle cx="0" cy="0" r="28" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.4"/>
+    
+    <!-- Pentagon sections -->
+    <path d="M 0,-20 L 15,-8 L 9,16 L -9,16 L -15,-8 Z" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="0.6"/>
+    <path d="M 15,-8 L 24,0 L 15,16 L 0,20 L 9,10 Z" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="0.6"/>
+    <path d="M -15,-8 L -24,0 L -15,16 L 0,20 L -9,10 Z" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="0.6"/>
+    
+    <!-- Green accent circle -->
+    <circle cx="0" cy="0" r="25" fill="none" stroke="url(#greenGradient)" stroke-width="2" opacity="0.8"/>
+  </g>
+  
+  <!-- Accent line with arrow -->
+  <g transform="translate(240, 68)">
+    <line x1="0" y1="0" x2="35" y2="0" stroke="url(#greenGradient)" stroke-width="3" stroke-linecap="round"/>
+    <!-- Arrow -->
+    <polygon points="35,0 28,-4 28,4" fill="url(#greenGradient)"/>
+  </g>
+</svg>
