@@ -550,6 +550,83 @@ const mergeSportsGroundData = (
   };
 };
 
+const refreshClubLeagueTableFromOefb = async (club: {
+  id: number;
+  oefbClubProfileUrl: string | null;
+}) => {
+  if (!club.oefbClubProfileUrl) {
+    return;
+  }
+
+  try {
+    const normalizedOefbUrl = normalizeAndValidateOefbNewsUrl(
+      club.oefbClubProfileUrl,
+    );
+    const tableUrl = buildOefbTableUrl(normalizedOefbUrl);
+    const tableResponse = await fetch(tableUrl);
+
+    if (!tableResponse.ok) {
+      throw new Error(
+        `ÖFB-Tabelle konnte nicht geladen werden (${tableResponse.status}).`,
+      );
+    }
+
+    const tableHtml = await tableResponse.text();
+    const leagueTableData = parseLeagueTable(
+      tableHtml,
+      normalizedOefbUrl,
+      tableUrl,
+    );
+
+    await prisma.clubProfile.update({
+      where: {
+        id: club.id,
+      },
+      data: {
+        oefbClubProfileUrl: normalizedOefbUrl,
+        leagueTableData,
+      },
+    });
+  } catch (error) {
+    console.warn(
+      `ÖFB-Tabellen-Aktualisierung für Verein ${club.id} fehlgeschlagen. Gespeicherte Tabelle wird verwendet.`,
+      error,
+    );
+  }
+};
+
+const refreshClubLeagueTableByUserIdFromOefb = async (userId: number) => {
+  const club = await prisma.clubProfile.findUnique({
+    where: {
+      userId,
+    },
+    select: {
+      id: true,
+      oefbClubProfileUrl: true,
+    },
+  });
+
+  if (club) {
+    await refreshClubLeagueTableFromOefb(club);
+  }
+};
+
+const refreshAllClubLeagueTablesFromOefb = async () => {
+  const clubs = await prisma.clubProfile.findMany({
+    where: {
+      oefbClubProfileUrl: {
+        not: null,
+      },
+    },
+    select: {
+      id: true,
+      oefbClubProfileUrl: true,
+    },
+  });
+
+  await Promise.all(clubs.map((club) => refreshClubLeagueTableFromOefb(club)));
+};
+
 export const createClubProfile = async (
   userId: number,
   data: CreateClubProfileBody,
@@ -680,6 +757,8 @@ export const createClubProfile = async (
 };
 
 export const getMyClubProfile = async (userId: number) => {
+  await refreshClubLeagueTableByUserIdFromOefb(userId);
+
   return prisma.clubProfile.findUnique({
     where: {
       userId,
@@ -688,6 +767,8 @@ export const getMyClubProfile = async (userId: number) => {
 };
 
 export const getAllClubs = async () => {
+  await refreshAllClubLeagueTablesFromOefb();
+
   return prisma.clubProfile.findMany({
     include: {
       user: {
@@ -984,6 +1065,8 @@ export const updateMyClubContact = async (
 };
 
 export const getClubDashboard = async (userId: number) => {
+  await refreshClubLeagueTableByUserIdFromOefb(userId);
+
   const club = await prisma.clubProfile.findUnique({
     where: {
       userId,
