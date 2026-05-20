@@ -23,35 +23,16 @@ import oefbRoutes from "./modules/oefb/oefb.routes";
 const app = express();
 
 const allowedOrigins = (
-  process.env.CORS_ORIGIN ||
-  "http://localhost:3001,https://match-your-club-frontend-o93u.vercel.app"
+  process.env.CORS_ORIGIN || "https://match-your-club-frontend.vercel.app"
 )
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const isAllowedVercelPreviewOrigin = (origin: string) => {
-  try {
-    const { hostname, protocol } = new URL(origin);
-
-    return (
-      protocol === "https:" &&
-      hostname.endsWith(".vercel.app") &&
-      hostname.startsWith("match-your-club-frontend-o93u")
-    );
-  } catch {
-    return false;
-  }
-};
-
 app.use(
   cors({
     origin(origin, callback) {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        isAllowedVercelPreviewOrigin(origin)
-      ) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
         return;
       }
