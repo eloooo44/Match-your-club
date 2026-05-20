@@ -30,10 +30,28 @@ const allowedOrigins = (
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const isAllowedVercelPreviewOrigin = (origin: string) => {
+  try {
+    const { hostname, protocol } = new URL(origin);
+
+    return (
+      protocol === "https:" &&
+      hostname.endsWith(".vercel.app") &&
+      hostname.startsWith("match-your-club-frontend-o93u")
+    );
+  } catch {
+    return false;
+  }
+};
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        isAllowedVercelPreviewOrigin(origin)
+      ) {
         callback(null, true);
         return;
       }
