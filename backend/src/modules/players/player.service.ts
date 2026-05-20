@@ -727,6 +727,72 @@ export const deletePlayer = async (id: number) => {
   });
 };
 
+export const deleteOwnPlayer = async (id: number, userId: number) => {
+  const player = await prisma.playerProfile.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      userId: true,
+    },
+  });
+
+  if (!player) {
+    throw new Error("Player profile not found");
+  }
+
+  if (player.userId !== userId) {
+    throw new Error("You can only delete your own player profile");
+  }
+
+  return deletePlayer(id);
+};
+
+export const deleteMyPlayerAccount = async (userId: number) => {
+  const player = await prisma.playerProfile.findUnique({
+    where: {
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!player) {
+    throw new Error("Player profile not found");
+  }
+
+  await prisma.$transaction([
+    prisma.ratingSkill.deleteMany({
+      where: {
+        rating: {
+          fromUserId: userId,
+        },
+      },
+    }),
+    prisma.rating.deleteMany({
+      where: {
+        fromUserId: userId,
+      },
+    }),
+    prisma.recommendation.deleteMany({
+      where: {
+        fromUserId: userId,
+      },
+    }),
+    prisma.attributeVerification.deleteMany({
+      where: {
+        fromUserId: userId,
+      },
+    }),
+    prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    }),
+  ]);
+};
+
 export const uploadPlayerImage = async (
   playerId: number,
   imagePath: string,

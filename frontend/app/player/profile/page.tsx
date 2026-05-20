@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import BackToPreviousPage from "@/src/components/BackToPreviousPage";
 import { apiFetch } from "@/services/api";
 
@@ -114,10 +115,14 @@ const statItems = (stat: OefbStatistic) => [
 ];
 
 export default function PlayerProfilePage() {
+  const router = useRouter();
   const [oefbUrl, setOefbUrl] = useState(defaultOefbUrl);
   const [profile, setProfile] = useState<OefbPlayerProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deleteWarningOpen, setDeleteWarningOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     const savedProfileUrl = localStorage.getItem("oefbProfileUrl");
@@ -144,6 +149,40 @@ export default function PlayerProfilePage() {
       setProfile(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteOwnProfile = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setDeleteError("Du musst angemeldet sein, um dein Profil zu löschen.");
+      return;
+    }
+
+    setDeleteLoading(true);
+    setDeleteError("");
+
+    try {
+      await apiFetch("/players/me", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("oefbProfileUrl");
+
+      router.replace("/");
+    } catch (err) {
+      setDeleteError(
+        (err as Error).message || "Profil konnte nicht gelöscht werden.",
+      );
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -409,6 +448,73 @@ export default function PlayerProfilePage() {
             </div>
           </section>
         )}
+
+        <section className="mt-8 rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h2 className="text-xl font-black text-red-700">
+                Profil löschen
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+                Dein Spielerprofil, dein Account und alle dazugehörigen Daten
+                werden aus der Datenbank gelöscht. Danach bist du ausgeloggt und
+                dein Profil ist für andere nicht mehr sichtbar.
+              </p>
+            </div>
+            {!deleteWarningOpen && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteWarningOpen(true);
+                  setDeleteError("");
+                }}
+                className="min-h-12 rounded-xl bg-red-600 px-5 text-sm font-black text-white transition hover:bg-red-700"
+              >
+                Profil löschen
+              </button>
+            )}
+          </div>
+
+          {deleteWarningOpen && (
+            <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
+              <h3 className="text-lg font-black text-red-800">
+                Soll dein Profil wirklich gelöscht werden?
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-red-700">
+                Diese Aktion kann nicht rückgängig gemacht werden. Bestätige nur,
+                wenn du deinen Account endgültig entfernen möchtest.
+              </p>
+
+              {deleteError && (
+                <p className="mt-4 rounded-xl border border-red-300 bg-white px-4 py-3 text-sm font-semibold text-red-700">
+                  {deleteError}
+                </p>
+              )}
+
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={deleteOwnProfile}
+                  disabled={deleteLoading}
+                  className="min-h-12 rounded-xl bg-red-700 px-5 text-sm font-black text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-red-300"
+                >
+                  {deleteLoading ? "Löscht..." : "Ja, endgültig löschen"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteWarningOpen(false);
+                    setDeleteError("");
+                  }}
+                  disabled={deleteLoading}
+                  className="min-h-12 rounded-xl border border-neutral-300 bg-white px-5 text-sm font-black text-neutral-800 transition hover:bg-neutral-100 disabled:cursor-not-allowed"
+                >
+                  Abbrechen
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </main>
   );

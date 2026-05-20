@@ -14,11 +14,13 @@ router.get("/dashboard", authenticate, playerController.getPlayerDashboard);
 
 router.patch("/me", authenticate, playerController.updateMyProfile);
 
+router.delete("/me", authenticate, playerController.deleteMyPlayerAccount);
+
 router.get("/search", playerController.searchPlayers);
 
 router.get("/", playerController.getAllPlayers);
 
-router.delete("/:id", playerController.deletePlayer);
+router.delete("/:id", authenticate, playerController.deletePlayer);
 
 router.post(
   "/upload-image/:id",

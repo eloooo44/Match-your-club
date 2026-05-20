@@ -121,12 +121,26 @@ export const searchPlayers = async (req: Request, res: Response) => {
   }
 };
 
-export const deletePlayer = async (req: Request, res: Response) => {
+export const deletePlayer = async (req: AuthRequest, res: Response) => {
   try {
-    await playerService.deletePlayer(Number(req.params.id));
+    await playerService.deleteOwnPlayer(Number(req.params.id), req.user!.userId);
 
     res.json({
       message: "Player deleted",
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: (error as Error).message,
+    });
+  }
+};
+
+export const deleteMyPlayerAccount = async (req: AuthRequest, res: Response) => {
+  try {
+    await playerService.deleteMyPlayerAccount(req.user!.userId);
+
+    res.json({
+      message: "Player account deleted",
     });
   } catch (error) {
     res.status(400).json({
