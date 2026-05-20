@@ -22,7 +22,26 @@ import oefbRoutes from "./modules/oefb/oefb.routes";
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = (
+  process.env.CORS_ORIGIN ||
+  "http://localhost:3001,https://match-your-club-frontend-o93u.vercel.app"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS origin not allowed: ${origin}`));
+    },
+  }),
+);
 app.use(express.json());
 app.use("/api/matching", matchingRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));

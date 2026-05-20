@@ -25,9 +25,15 @@ The frontend runs on `http://localhost:3001` and expects the backend at `NEXT_PU
 
 GitHub is the right place for the repository, but GitHub Pages only hosts static frontend files. This project also needs a running backend and database.
 
+Current deployment:
+
+- Frontend: `https://match-your-club-frontend-o93u.vercel.app`
+- Backend: `https://match-your-club.onrender.com`
+
 Recommended setup:
 
 - Host the repository on GitHub.
-- Deploy `frontend/` on Vercel or Netlify and set `NEXT_PUBLIC_API_BASE` to your backend URL.
+- Deploy `frontend/` on Vercel or Netlify and set `NEXT_PUBLIC_API_BASE` to your backend URL. If unset in production, the frontend falls back to `https://match-your-club.onrender.com`.
 - Deploy `backend/` on Render, Railway, Fly.io, or a VPS.
 - Use a hosted PostgreSQL database and set `DATABASE_URL` plus `JWT_SECRET` in the backend host.
+- Set `CORS_ORIGIN` on the backend host to the frontend origin, for example `https://match-your-club-frontend-o93u.vercel.app`.
