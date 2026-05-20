@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import ClubNav from "@/src/components/ClubNav";
 import { useAuth } from "@/src/hooks/useAuth";
+import { mediaUrl } from "@/src/lib/media";
 
 type PlayerResult = {
   id: number;
@@ -636,10 +637,10 @@ export default function PlayerSearchPage() {
                 <div className="grid gap-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-start">
                   <img
                     src={
-                      player.profileImagePath
-                        ? `${API_BASE}/${player.profileImagePath}`
-                        : player.profileImageUrl ||
-                          "https://placehold.co/180x180"
+                      mediaUrl(
+                        player.profileImagePath || player.profileImageUrl,
+                        API_BASE,
+                      ) || "https://placehold.co/180x180"
                     }
                     alt={player.name}
                     className="h-28 w-28 rounded-2xl object-cover"

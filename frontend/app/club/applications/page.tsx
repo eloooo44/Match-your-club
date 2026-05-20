@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import ClubNav from "@/src/components/ClubNav";
 import { apiFetch } from "@/services/api";
+import { mediaUrl } from "@/src/lib/media";
 
 import { API_BASE } from "@/src/lib/apiBase";
 
@@ -208,9 +209,10 @@ export default function ClubApplicationsPage() {
         <section className="grid gap-5">
           {applications.map((application) => {
             const player = application.player;
-            const imageUrl = player.profileImagePath
-              ? `${API_BASE}/${player.profileImagePath}`
-              : player.profileImageUrl;
+            const imageUrl = mediaUrl(
+              player.profileImagePath || player.profileImageUrl,
+              API_BASE,
+            );
 
             return (
               <article

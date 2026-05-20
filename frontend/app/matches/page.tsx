@@ -221,9 +221,10 @@ export default function MatchesPage() {
         {!loading && user?.role === "club" && playerMatches.length > 0 && (
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {playerMatches.map((player) => {
-              const image = player.profileImagePath
-                ? `${API_BASE}/${player.profileImagePath}`
-                : (player.profileImageUrl ?? null);
+              const image = mediaUrl(
+                player.profileImagePath || player.profileImageUrl,
+                API_BASE,
+              );
 
               return (
                 <Link

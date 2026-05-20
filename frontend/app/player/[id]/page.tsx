@@ -304,9 +304,9 @@ export default function PlayerDetailPage({
     loadPlayer().catch(() => setPlayer(null));
   }, [id]);
 
-  const imageUrl = player?.profileImagePath
-    ? `${apiBaseUrl}/${player.profileImagePath}`
-    : player?.profileImageUrl || "https://placehold.co/300x300";
+  const imageUrl =
+    mediaUrl(player?.profileImagePath || player?.profileImageUrl, apiBaseUrl) ||
+    "https://placehold.co/300x300";
 
   const overallScore = useMemo(() => {
     if (!player?.attributes) return null;
@@ -918,7 +918,7 @@ export default function PlayerDetailPage({
                         {player.videos.map((video) => {
                           const embedUrl = getEmbeddableVideoUrl(video.videoUrl);
                           const localVideoUrl = video.videoPath
-                            ? `${apiBaseUrl}/${video.videoPath}`
+                            ? mediaUrl(video.videoPath, apiBaseUrl) || ""
                             : video.videoUrl || undefined;
 
                           return (

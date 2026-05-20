@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import ClubNav from "@/src/components/ClubNav";
+import { mediaUrl } from "@/src/lib/media";
 
 type TrialTraining = {
   id: number;
@@ -496,10 +497,11 @@ export default function ClubTrialTrainingsPage() {
                   <div className="flex items-center gap-5">
                     <img
                       src={
-                        training.player.profileImagePath
-                          ? `${API_BASE}/${training.player.profileImagePath}`
-                          : training.player.profileImageUrl ||
-                            "https://placehold.co/120x120"
+                        mediaUrl(
+                          training.player.profileImagePath ||
+                            training.player.profileImageUrl,
+                          API_BASE,
+                        ) || "https://placehold.co/120x120"
                       }
                       alt={training.player.name}
                       className="h-24 w-24 rounded-full object-cover"

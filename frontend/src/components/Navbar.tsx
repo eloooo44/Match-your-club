@@ -65,9 +65,10 @@ export default function Navbar() {
           profileImageUrl?: string | null;
         };
 
-        const avatar = playerData.profileImagePath
-          ? `${API_BASE}/${playerData.profileImagePath}`
-          : (playerData.profileImageUrl ?? null);
+        const avatar = mediaUrl(
+          playerData.profileImagePath || playerData.profileImageUrl,
+          API_BASE,
+        );
 
         setPlayerAvatarUrl(avatar);
         setPlayerProfileHref(
